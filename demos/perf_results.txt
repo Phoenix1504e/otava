@@ -1,0 +1,15 @@
+Demo D4: wall-clock cost of the detection paths at production scale.
+
+Series: N points, change points every ~N/4, gaussian noise, window_len=60.
+The permutation reference is skipped at N=8000 (its O(N^2) per-permutation
+cost makes it impractical there - that is exactly the gap windowing closes).
+
+     N |  legacy split+merge |  windowed core(ttest) |  windowed core(perm) |  no-window perm ref
+----------------------------------------------------------------------------------------------------
+   500 |               26 ms |                 60 ms |              3135 ms |             3678 ms |
+  1000 |               42 ms |                 94 ms |              6464 ms |            12215 ms |
+  2000 |               89 ms |                232 ms |             39067 ms |            62392 ms |
+  4000 |              169 ms |                833 ms | ------------------- | ------------------- |
+  8000 |              361 ms |               3579 ms | ------------------- | ------------------- |
+
+sanity at N=8000: legacy found 11 cps, windowed core found 12 cps (4 true cps)

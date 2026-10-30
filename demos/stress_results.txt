@@ -1,0 +1,56 @@
+Demo D3: randomized stress sweep - legacy chunked path vs windowed core
+vs no-window permutation reference, across change-point layouts and magnitudes.
+
+Configs (N=250, window_len=60, max_pvalue=0.001, 30 seeds each):
+  - single step at 100, delta/sigma in {1.0, 1.5, 2.0, 3.0}
+  - twin steps at 100 and 100+sep, sep in {20, 40, 80}, delta = 2 sigma
+  - triple steps at 70/140/210, delta = 2 sigma
+
+
+single, delta=1.0 sigma  (truth: [100], 30 seeds, 30 change points total)
+  legacy split+merge: found  18/30  med|err| 2  spurious  12  (   0.3 s total)
+  windowed core(ttest): found  22/30  med|err| 1  spurious  46  (   1.1 s total)
+  windowed core(perm): found   8/30  med|err| 1  spurious   1  (  11.0 s total)
+  no-window perm ref: found  21/30  med|err| 1  spurious   9  (  12.9 s total)
+
+single, delta=1.5 sigma  (truth: [100], 30 seeds, 30 change points total)
+  legacy split+merge: found  28/30  med|err| 0  spurious   8  (   0.3 s total)
+  windowed core(ttest): found  29/30  med|err| 1  spurious  36  (   1.1 s total)
+  windowed core(perm): found  24/30  med|err| 1  spurious   2  (  16.9 s total)
+  no-window perm ref: found  29/30  med|err| 0  spurious   1  (  12.2 s total)
+
+single, delta=2.0 sigma  (truth: [100], 30 seeds, 30 change points total)
+  legacy split+merge: found  30/30  med|err| 0  spurious   6  (   0.3 s total)
+  windowed core(ttest): found  30/30  med|err| 0  spurious  34  (   1.1 s total)
+  windowed core(perm): found  29/30  med|err| 0  spurious   0  (  18.2 s total)
+  no-window perm ref: found  30/30  med|err| 0  spurious   0  (  12.2 s total)
+
+single, delta=3.0 sigma  (truth: [100], 30 seeds, 30 change points total)
+  legacy split+merge: found  30/30  med|err| 0  spurious   6  (   0.3 s total)
+  windowed core(ttest): found  30/30  med|err| 0  spurious  32  (   1.1 s total)
+  windowed core(perm): found  30/30  med|err| 0  spurious   0  (  18.4 s total)
+  no-window perm ref: found  30/30  med|err| 0  spurious   0  (  12.2 s total)
+
+twins, 20 apart (< window_len)  (truth: [100, 120], 30 seeds, 60 change points total)
+  legacy split+merge: found  60/60  med|err| 0  spurious   6  (   0.4 s total)
+  windowed core(ttest): found  60/60  med|err| 0  spurious  34  (   1.2 s total)
+  windowed core(perm): found  56/60  med|err| 0  spurious   3  (  30.5 s total)
+  no-window perm ref: found  60/60  med|err| 0  spurious   0  (  17.0 s total)
+
+twins, 40 apart (< window_len)  (truth: [100, 140], 30 seeds, 60 change points total)
+  legacy split+merge: found  59/60  med|err| 0  spurious   8  (   0.4 s total)
+  windowed core(ttest): found  59/60  med|err| 0  spurious  31  (   1.3 s total)
+  windowed core(perm): found  59/60  med|err| 0  spurious   1  (  32.0 s total)
+  no-window perm ref: found  59/60  med|err| 0  spurious   1  (  16.5 s total)
+
+twins, 80 apart (> window_len)  (truth: [100, 180], 30 seeds, 60 change points total)
+  legacy split+merge: found  60/60  med|err| 0  spurious   7  (   0.4 s total)
+  windowed core(ttest): found  60/60  med|err| 0  spurious  35  (   1.3 s total)
+  windowed core(perm): found  60/60  med|err| 0  spurious   0  (  32.0 s total)
+  no-window perm ref: found  60/60  med|err| 0  spurious   0  (  16.2 s total)
+
+triple, 70/140/210  (truth: [70, 140, 210], 30 seeds, 90 change points total)
+  legacy split+merge: found  87/90  med|err| 0  spurious   9  (   0.4 s total)
+  windowed core(ttest): found  88/90  med|err| 0  spurious  40  (   1.5 s total)
+  windowed core(perm): found  82/90  med|err| 0  spurious   4  (  46.8 s total)
+  no-window perm ref: found  88/90  med|err| 0  spurious   2  (  20.7 s total)

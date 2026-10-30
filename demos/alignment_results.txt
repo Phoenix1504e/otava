@@ -1,0 +1,53 @@
+Demo D2: what p-value does a change point get? It depends on where the
+window grid happens to fall (legacy chunked path) - vs a stable answer with
+the window pushed into the core (issue #84 prototype).
+
+Setup: one clean step change (+2 sigma) at index c=177 in a 250-point series,
+window_len=60 (chunked path scans windows of 60 with step 30).
+The first chunked window that contains the change point sees it at local
+position 57, i.e. with only 3 points of right context. The window-local
+t-test p-value that split()'s index-dedup keeps (and that merge() judges) is
+a function of that accidental geometry - while the same change point scored
+with full context has p ~ 1e-15.
+
+We repeat the SAME signal with 0 / 15 / 30 flat noise points prepended
+(drawn from a separate fixed generator, so the data around the change point
+is bit-identical in all three cases; only the window grid alignment shifts).
+
+
+=== prepend=  0 -> change point at index 177 (full-context p = 9.36e-33) ===
+  split() per-window detections (index, window-local p, kept by index-dedup?):
+    idx= 139  p=7.41e-03  KEPT
+    idx= 181  p=9.87e-07  KEPT
+  -> true CP 177 is NOT in the weak list at all
+  legacy split+merge answer : [181]
+  windowed core answer      : [180]
+  no-window perm. reference : [181]
+
+=== prepend= 15 -> change point at index 192 (full-context p = 6.55e-34) ===
+  split() per-window detections (index, window-local p, kept by index-dedup?):
+    idx= 148  p=8.16e-03  KEPT
+    idx= 153  p=1.30e-03  KEPT
+    idx= 196  p=6.38e-06  KEPT
+  -> true CP 192 is NOT in the weak list at all
+  legacy split+merge answer : [196]
+  windowed core answer      : [195]
+  no-window perm. reference : [196]
+
+=== prepend= 30 -> change point at index 207 (full-context p = 1.68e-35) ===
+  split() per-window detections (index, window-local p, kept by index-dedup?):
+    idx= 169  p=7.41e-03  KEPT
+    idx= 211  p=9.87e-07  KEPT
+  -> true CP 207 is NOT in the weak list at all
+  legacy split+merge answer : [211]
+  windowed core answer      : [210]
+  no-window perm. reference : [211]
+
+=== noiseless sanity check (no bias allowed) ===
+  window_len=None: candidate index = 177 (exact: True)
+  window_len=60: candidate index = 177 (exact: True)
+
+=== 30-seed robustness (found = detection within +-5 of truth) ===
+  prepend=  0: legacy found 23/30 (med err 1) | windowed core 24/30 (med err 0) | no-window ref 29/30 (med err 0) | weak-p >10x unfair 15/15
+  prepend= 15: legacy found 29/30 (med err 0) | windowed core 24/30 (med err 0) | no-window ref 29/30 (med err 0) | weak-p >10x unfair 17/17
+  prepend= 30: legacy found 24/30 (med err 0) | windowed core 24/30 (med err 0) | no-window ref 29/30 (med err 0) | weak-p >10x unfair 17/17
